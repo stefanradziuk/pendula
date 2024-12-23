@@ -1,8 +1,13 @@
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 500;
 
-const ARR_X = 15;
-const ARR_Y = 15;
+const ARR_X = 20;
+const ARR_Y = 3;
+
+const INIT_SCATTER_MULT = 0.005;
+
+const INIT_THETA_MIN = 0.05;
+const INIT_THETA_MAX = 0.25;
 
 const INIT_X = CANVAS_WIDTH / 2;
 const INIT_Y = CANVAS_HEIGHT / 2;
@@ -55,31 +60,24 @@ function Pendulum(theta1, theta2){
   };
 };
 
-
-// let pendulum1;
 let pendula;
 
 function setup() {
   createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
   fill(0, 0, 0);
 
-  // pendulum1 = new Pendulum(random(3.14), random(3.14));
+  const root_t1 = random(INIT_THETA_MIN, INIT_THETA_MAX) * 3.14;
+  const root_t2 = random(INIT_THETA_MIN, INIT_THETA_MAX) * 3.14;
+
   pendula = Array(ARR_Y).fill().map(
     (o, y) => Array(ARR_X).fill().map(
-      (o, x) => new Pendulum(random(y * 3.14 / ARR_Y), random(x * 3.14 / ARR_X))
+      (o, x) => new Pendulum(root_t1 + y / (0.5 * ARR_Y) * 3.14 * INIT_SCATTER_MULT, root_t2 + x / (0.5 * ARR_Y) * 3.14 * INIT_SCATTER_MULT)
     )
   );
 }
 
 function draw() {
   clear();
-  // ellipse(INIT_X, INIT_Y, CIRCLE_RADIUS, CIRCLE_RADIUS);
-
-  // stroke(sin(pendulum1.theta1) ** 2 * 255, sin(pendulum1.theta2) ** 2 * 255, 0);
-  // fill(sin(pendulum1.theta1) ** 2 * 255, sin(pendulum1.theta2) ** 2 * 255, 0);
-
-  // pendulum1.draw(INIT_X, INIT_Y);
-  // pendulum1.step();
 
   pendula.forEach(
     (arr, y) => arr.forEach(
@@ -96,17 +94,4 @@ function draw() {
   );
 }
 
-function drawPendulum(initX, initY, theta1, theta2) {
-
-  const x1 = initX + LINE1_LENGTH * sin(theta1);
-  const y1 = initY + LINE1_LENGTH * cos(theta1);
-
-  line(initX, initY, x1, y1);
-  ellipse(x1, y1, CIRCLE_RADIUS, CIRCLE_RADIUS);
-
-  const x2 = x1 + LINE2_LENGTH * sin(theta2);
-  const y2 = y1 + LINE2_LENGTH * cos(theta2);
-
-  line(x1, y1, x2, y2);
-  ellipse(x2, y2, CIRCLE_RADIUS, CIRCLE_RADIUS);
-}
+/* alt. idea: draw two pendulums and lerp n pendulums between them */

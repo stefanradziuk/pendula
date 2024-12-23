@@ -6,7 +6,7 @@ const ORIGIN = [250, 250];
 const ARR_X = 25;
 const ARR_Y = 12;
 
-const INIT_SCATTER_MULT = 0.0005;
+const INIT_SCATTER_MULT = 0.0001;
 
 const INIT_THETA_MIN = 0.0;
 const INIT_THETA_MAX = 1.0;
@@ -31,7 +31,14 @@ const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
 const RGB_MAX = 255;
 const ERR_COLOR = [235, 91, 52];
 
-function Pendulum(theta1, theta2){
+let COLOR_0;
+let COLOR_T1;
+let COLOR_T2;
+
+let pendula;
+let colorGrid;
+
+function Pendulum(theta1, theta2) {
   this.theta1 = theta1;
   this.theta2 = theta2;
 
@@ -90,24 +97,27 @@ function Pendulum(theta1, theta2){
   this.getColor = function() {
     if (isNaN(this.theta1) || isNaN(this.theta2))
     {
-      return ERR_COLOR;
+      return color(...ERR_COLOR);
     }
-    return [
-      0,
-      sin(this.theta1) ** 2 * RGB_MAX,
-      sin(this.theta2) ** 2 * RGB_MAX,
-    ];
+
+    const theta1Ratio = sin(this.theta1) ** 2;
+    const theta2Ratio = sin(this.theta2) ** 2;
+    const theta1Idx = floor(theta1Ratio * colorGrid.length);
+    const theta2Idx = floor(theta2Ratio * colorGrid[0].length);
+
+    console.assert(theta1Idx >= 0 && theta1Idx < colorGrid.length, this.theta1, theta1Idx);
+    console.assert(theta2Idx >= 0 && theta2Idx < colorGrid[0].length, this.theta2, theta2Idx);
+
+    return colorGrid[theta1Idx][theta2Idx];
   }
 };
 
-let pendula;
-
-function setup() {
-  createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-  fill(0, 0, 0);
-
+function initPendula() {
   const rootT1 = random([-1, 1]) * random(INIT_THETA_MIN, INIT_THETA_MAX) * PI;
   const rootT2 = random([-1, 1]) * random(INIT_THETA_MIN, INIT_THETA_MAX) * PI;
+
+  console.log("root t1:", rootT1);
+  console.log("root t2:", rootT2);
 
   pendula = Array(ARR_Y).fill().map(
     (o, y) => Array(ARR_X).fill().map(
@@ -120,6 +130,55 @@ function setup() {
   );
 }
 
+function initColorGrid() {
+  colorGrid = Array(RGB_MAX).fill().map((o, y) => Array(RGB_MAX).fill(NaN));
+
+  for (let y = 0; y < colorGrid.length; y++) {
+    colorGrid[y][0] = lerpColor(COLOR_0, COLOR_T1, y / colorGrid.length);
+  }
+
+  for (let x = 0; x < colorGrid[0].length; x++) {
+    colorGrid[0][x] = lerpColor(COLOR_0, COLOR_T2, x / colorGrid[0].length);
+  }
+
+  for (let y = 1; y < colorGrid.length; y++) {
+    for (let x = 1; x < colorGrid[0].length; x++) {
+      colorGrid[y][x] = lerpColor(colorGrid[y][0], colorGrid[0][x], x / (y + x));
+    }
+  }
+}
+
+function showColorGrid() {
+  colorGrid.forEach(
+    (arr, y) => arr.forEach(
+      (color, x) => {
+        fill(color);
+        stroke(color);
+        rect(
+          x * 1,
+          y * 1,
+          1,
+          1
+        );
+      }
+    )
+  );
+}
+
+function setup() {
+  createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+  fill(0, 0, 0);
+
+  COLOR_0 = color(0, 0, 0);
+  COLOR_T1 = color(240, 40, 100);
+  COLOR_T2 = color(10, 220, 200);
+
+  initPendula();
+  initColorGrid();
+
+  showColorGrid();
+}
+
 function draw() {
   clear();
 
@@ -127,8 +186,8 @@ function draw() {
     (arr, y) => arr.forEach(
       (pendulum, x) => {
         const color = pendulum.getColor();
-        fill(...color);
-        stroke(...color);
+        fill(color);
+        stroke(color);
 
         rect(
           GRID_MIDPOINT_X + (x - (arr.length - 1) / 2) * GRID_CELL_WIDTH,

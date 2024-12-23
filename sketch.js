@@ -11,7 +11,8 @@ const INIT_SCATTER_MULT = 0.005;
 const INIT_THETA_MIN = 0.05;
 const INIT_THETA_MAX = 0.25;
 
-const CIRCLE_RADIUS = 15;
+const CIRCLE_DIAMETER = 15;
+const CIRCLE_RADIUS = CIRCLE_DIAMETER / 2;
 const LINE1_LENGTH = 120;
 const LINE2_LENGTH = 120;
 
@@ -21,9 +22,9 @@ const MASS2 = 1;
 const ACCEL_CONST = 0.81;
 
 const GRID_MIDPOINT_X = ORIGIN[0];
-const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_RADIUS;
-const GRID_CELL_WIDTH = CIRCLE_RADIUS / 2;
-const GRID_CELL_HEIGHT = CIRCLE_RADIUS / 2;
+const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER;
+const GRID_CELL_WIDTH = CIRCLE_RADIUS;
+const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
 
 function Pendulum(theta1, theta2){
   this.theta1 = theta1;
@@ -54,13 +55,13 @@ function Pendulum(theta1, theta2){
     const y1 = initY + LINE1_LENGTH * cos(this.theta1);
 
     line(initX, initY, x1, y1);
-    ellipse(x1, y1, CIRCLE_RADIUS, CIRCLE_RADIUS);
+    ellipse(x1, y1, CIRCLE_DIAMETER, CIRCLE_DIAMETER);
 
     const x2 = x1 + LINE2_LENGTH * sin(this.theta2);
     const y2 = y1 + LINE2_LENGTH * cos(this.theta2);
 
     line(x1, y1, x2, y2);
-    ellipse(x2, y2, CIRCLE_RADIUS, CIRCLE_RADIUS);
+    ellipse(x2, y2, CIRCLE_DIAMETER, CIRCLE_DIAMETER);
   };
 
   this.getColor = function() {

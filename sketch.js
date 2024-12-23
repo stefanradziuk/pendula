@@ -2,7 +2,7 @@ const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 500;
 
 const ARR_X = 20;
-const ARR_Y = 3;
+const ARR_Y = 10;
 
 const INIT_SCATTER_MULT = 0.005;
 
@@ -58,6 +58,10 @@ function Pendulum(theta1, theta2){
     line(x1, y1, x2, y2);
     ellipse(x2, y2, CIRCLE_RADIUS, CIRCLE_RADIUS);
   };
+
+  this.getColor = function() {
+    return [0, sin(this.theta1) ** 2 * 255, sin(this.theta2) ** 2 * 255];
+  }
 };
 
 let pendula;
@@ -66,12 +70,16 @@ function setup() {
   createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
   fill(0, 0, 0);
 
-  const root_t1 = random(INIT_THETA_MIN, INIT_THETA_MAX) * 3.14;
-  const root_t2 = random(INIT_THETA_MIN, INIT_THETA_MAX) * 3.14;
+  const rootT1 = random([-1, 1]) * random(INIT_THETA_MIN, INIT_THETA_MAX) * PI;
+  const rootT2 = random([-1, 1]) * random(INIT_THETA_MIN, INIT_THETA_MAX) * PI;
 
   pendula = Array(ARR_Y).fill().map(
     (o, y) => Array(ARR_X).fill().map(
-      (o, x) => new Pendulum(root_t1 + y / (0.5 * ARR_Y) * 3.14 * INIT_SCATTER_MULT, root_t2 + x / (0.5 * ARR_Y) * 3.14 * INIT_SCATTER_MULT)
+      (o, x) => {
+        const initT1 = rootT1 + y / (0.5 * ARR_Y) * PI * INIT_SCATTER_MULT;
+        const initT2 = rootT2 + x / (0.5 * ARR_Y) * PI * INIT_SCATTER_MULT;
+        return new Pendulum(initT1, initT2);
+      }
     )
   );
 }
@@ -82,8 +90,9 @@ function draw() {
   pendula.forEach(
     (arr, y) => arr.forEach(
       (pendulum, x) => {
-        fill(0, sin(pendulum.theta1) ** 2 * 255, sin(pendulum.theta2) ** 2 * 255);
-        stroke(0, sin(pendulum.theta1) ** 2 * 255, sin(pendulum.theta2) ** 2 * 255);
+        const color = pendulum.getColor();
+        fill(...color);
+        stroke(...color);
 
         ellipse((x + 1) * CIRCLE_RADIUS, (y + 1) * CIRCLE_RADIUS, CIRCLE_RADIUS, CIRCLE_RADIUS);
         pendulum.draw(INIT_X, INIT_Y);

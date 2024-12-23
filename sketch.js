@@ -24,7 +24,7 @@ const ACCEL_CONST = 0.2;
 const SUBSTEP_COUNT = 10;
 
 const GRID_MIDPOINT_X = ORIGIN[0];
-const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER;
+const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + 1.5 * CIRCLE_DIAMETER;
 const GRID_CELL_WIDTH = CIRCLE_RADIUS;
 const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
 
@@ -154,12 +154,7 @@ function showColorGrid() {
       (color, x) => {
         fill(color);
         stroke(color);
-        rect(
-          x * 1,
-          y * 1,
-          1,
-          1
-        );
+        rect(ORIGIN[0] + x - arr.length / 2, y * 1, 1, 1);
       }
     )
   );
@@ -167,11 +162,10 @@ function showColorGrid() {
 
 function setup() {
   createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
-  fill(0, 0, 0);
 
-  COLOR_0 = color(0, 0, 0);
-  COLOR_T1 = color(240, 40, 100);
-  COLOR_T2 = color(10, 220, 200);
+  COLOR_0 = color(251, 239, 244);
+  COLOR_T1 = color(55, 61, 149);
+  COLOR_T2 = color(293, 67, 107);
 
   initPendula();
   initColorGrid();
@@ -180,7 +174,7 @@ function setup() {
 }
 
 function draw() {
-  clear();
+  // clear();
 
   pendula.forEach(
     (arr, y) => arr.forEach(

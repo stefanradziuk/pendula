@@ -24,19 +24,31 @@ const ACCEL_CONST = 0.2;
 const SUBSTEP_COUNT = 10;
 
 const GRID_MIDPOINT_X = ORIGIN[0];
-const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + 1.5 * CIRCLE_DIAMETER;
 const GRID_CELL_WIDTH = CIRCLE_RADIUS;
 const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
+const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER + GRID_CELL_HEIGHT;
+const GRID_BOT_Y = GRID_TOP_Y + ARR_Y * GRID_CELL_HEIGHT;
 
 const RGB_MAX = 255;
 const ERR_COLOR = [235, 91, 52];
 
-let COLOR_0;
-let COLOR_T1;
-let COLOR_T2;
+const DEFAULT_RGB_0 = [251, 239, 244];
+const DEFAULT_RGB_T1 = [55, 61, 149];
+const DEFAULT_RGB_T2 = [293, 67, 107];
+const DEFAULT_RGB_BACKGROUND = [0, 0, 29];
+
+let color0;
+let colorT1;
+let colorT2;
+let colorBackground;
 
 let pendula;
 let colorGrid;
+
+let picker0;
+let pickerT1;
+let pickerT2;
+let pickerBackground;
 
 function Pendulum(theta1, theta2) {
   this.theta1 = theta1;
@@ -134,11 +146,11 @@ function initColorGrid() {
   colorGrid = Array(RGB_MAX).fill().map((o, y) => Array(RGB_MAX).fill(NaN));
 
   for (let y = 0; y < colorGrid.length; y++) {
-    colorGrid[y][0] = lerpColor(COLOR_0, COLOR_T1, y / colorGrid.length);
+    colorGrid[y][0] = lerpColor(color0, colorT1, y / colorGrid.length);
   }
 
   for (let x = 0; x < colorGrid[0].length; x++) {
-    colorGrid[0][x] = lerpColor(COLOR_0, COLOR_T2, x / colorGrid[0].length);
+    colorGrid[0][x] = lerpColor(color0, colorT2, x / colorGrid[0].length);
   }
 
   for (let y = 1; y < colorGrid.length; y++) {
@@ -148,7 +160,7 @@ function initColorGrid() {
   }
 }
 
-function showColorGrid() {
+function drawColorGrid() {
   colorGrid.forEach(
     (arr, y) => arr.forEach(
       (color, x) => {
@@ -160,21 +172,79 @@ function showColorGrid() {
   );
 }
 
+function positionColorPickers() {
+  picker0.position(0, windowHeight - picker0.height);
+  pickerT1.position(picker0.position().x + picker0.width, picker0.position().y);
+  pickerT2.position(pickerT1.position().x + pickerT1.width, pickerT1.position().y);
+  pickerBackground.position(pickerT2.position().x + pickerT2.width, pickerT2.position().y);
+}
+
+function initColorPickers() {
+  picker0 = createColorPicker(color(...DEFAULT_RGB_0));
+  pickerT1 = createColorPicker(color(...DEFAULT_RGB_T1));
+  pickerT2 = createColorPicker(color(...DEFAULT_RGB_T2));
+  pickerBackground = createColorPicker(color(...DEFAULT_RGB_BACKGROUND));
+
+  positionColorPickers();
+}
+
+function colorsEqual(c1, c2) {
+  return red(c1) === red(c2) &&
+    green(c1) === green(c2) &&
+    blue(c1) === blue(c2) &&
+    alpha(c1) === alpha(c2);
+}
+
+function updateColors() {
+  const newColor0 = picker0.color();
+  const newColorT1 = pickerT1.color();
+  const newColorT2 = pickerT2.color();
+  const newColorBackground = pickerBackground.color();
+
+  const isInit = color0 === undefined;
+
+  if (!isInit &&
+    colorsEqual(newColor0, color0) &&
+    colorsEqual(newColorT1, colorT1) &&
+    colorsEqual(newColorT2, colorT2) &&
+    colorsEqual(newColorBackground, colorBackground))
+  {
+    return;
+  }
+
+  color0 = picker0.color();
+  colorT1 = pickerT1.color();
+  colorT2 = pickerT2.color();
+  colorBackground = pickerBackground.color();
+
+  initColorGrid();
+  drawColorGrid();
+  setBackgroundColor();
+}
+
+function setBackgroundColor() {
+  select("body").style("background-color", colorBackground);
+}
+
 function setup() {
   createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  COLOR_0 = color(251, 239, 244);
-  COLOR_T1 = color(55, 61, 149);
-  COLOR_T2 = color(293, 67, 107);
+  initColorPickers();
+  updateColors();
 
   initPendula();
   initColorGrid();
 
-  showColorGrid();
+  setBackgroundColor();
+  drawColorGrid();
+}
+
+function windowResized() {
+  positionColorPickers();
 }
 
 function draw() {
-  // clear();
+  updateColors();
 
   pendula.forEach(
     (arr, y) => arr.forEach(

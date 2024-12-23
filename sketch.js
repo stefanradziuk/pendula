@@ -120,6 +120,11 @@ function Pendulum(theta1, theta2) {
     console.assert(theta1Idx >= 0 && theta1Idx < colorGrid.length, this.theta1, theta1Idx);
     console.assert(theta2Idx >= 0 && theta2Idx < colorGrid[0].length, this.theta2, theta2Idx);
 
+    if (undefined === colorGrid[theta1Idx][theta2Idx])
+    {
+      console.assert(theta1Idx !== 0 && theta2Idx !== 0, theta1Idx, theta2Idx);
+      colorGrid[theta1Idx][theta2Idx] = lerpColor(colorGrid[theta1Idx][0], colorGrid[0][theta2Idx], theta2Idx / (theta1Idx + theta2Idx));
+    }
     return colorGrid[theta1Idx][theta2Idx];
   }
 };
@@ -155,21 +160,9 @@ function initColorGrid() {
 
   for (let y = 1; y < colorGrid.length; y++) {
     for (let x = 1; x < colorGrid[0].length; x++) {
-      colorGrid[y][x] = lerpColor(colorGrid[y][0], colorGrid[0][x], x / (y + x));
+      colorGrid[y][x] = undefined;
     }
   }
-}
-
-function drawColorGrid() {
-  colorGrid.forEach(
-    (arr, y) => arr.forEach(
-      (color, x) => {
-        fill(color);
-        stroke(color);
-        rect(ORIGIN[0] + x - arr.length / 2, y * 1, 1, 1);
-      }
-    )
-  );
 }
 
 function positionColorPickers() {
@@ -218,7 +211,6 @@ function updateColors() {
   colorBackground = pickerBackground.color();
 
   initColorGrid();
-  drawColorGrid();
   setBackgroundColor();
 }
 
@@ -236,7 +228,6 @@ function setup() {
   initColorGrid();
 
   setBackgroundColor();
-  drawColorGrid();
 }
 
 function windowResized() {

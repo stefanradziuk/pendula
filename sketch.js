@@ -28,6 +28,9 @@ const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER;
 const GRID_CELL_WIDTH = CIRCLE_RADIUS;
 const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
 
+const RGB_MAX = 255;
+const ERR_COLOR = [235, 91, 52];
+
 function Pendulum(theta1, theta2){
   this.theta1 = theta1;
   this.theta2 = theta2;
@@ -87,9 +90,13 @@ function Pendulum(theta1, theta2){
   this.getColor = function() {
     if (isNaN(this.theta1) || isNaN(this.theta2))
     {
-      return [140, 70, 40];
+      return ERR_COLOR;
     }
-    return [0, sin(this.theta1) ** 2 * 255, sin(this.theta2) ** 2 * 255];
+    return [
+      0,
+      sin(this.theta1) ** 2 * RGB_MAX,
+      sin(this.theta2) ** 2 * RGB_MAX,
+    ];
   }
 };
 

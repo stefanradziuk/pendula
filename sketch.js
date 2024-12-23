@@ -1,5 +1,7 @@
 const CANVAS_WIDTH = 500;
-const CANVAS_HEIGHT = 500;
+const CANVAS_HEIGHT = 750;
+
+const ORIGIN = [250, 250];
 
 const ARR_X = 20;
 const ARR_Y = 10;
@@ -9,9 +11,6 @@ const INIT_SCATTER_MULT = 0.005;
 const INIT_THETA_MIN = 0.05;
 const INIT_THETA_MAX = 0.25;
 
-const INIT_X = CANVAS_WIDTH / 2;
-const INIT_Y = CANVAS_HEIGHT / 2;
-
 const CIRCLE_RADIUS = 15;
 const LINE1_LENGTH = 120;
 const LINE2_LENGTH = 120;
@@ -20,6 +19,11 @@ const MASS1 = 1;
 const MASS2 = 1;
 
 const ACCEL_CONST = 0.81;
+
+const GRID_MIDPOINT_X = ORIGIN[0];
+const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_RADIUS;
+const GRID_CELL_WIDTH = CIRCLE_RADIUS / 2;
+const GRID_CELL_HEIGHT = CIRCLE_RADIUS / 2;
 
 function Pendulum(theta1, theta2){
   this.theta1 = theta1;
@@ -94,8 +98,13 @@ function draw() {
         fill(...color);
         stroke(...color);
 
-        ellipse((x + 1) * CIRCLE_RADIUS, (y + 1) * CIRCLE_RADIUS, CIRCLE_RADIUS, CIRCLE_RADIUS);
-        pendulum.draw(INIT_X, INIT_Y);
+        rect(
+          GRID_MIDPOINT_X + (x - (arr.length - 1) / 2) * GRID_CELL_WIDTH,
+          GRID_TOP_Y + (y + 1) * GRID_CELL_HEIGHT,
+          GRID_CELL_WIDTH,
+          GRID_CELL_HEIGHT
+        );
+        pendulum.draw(...ORIGIN);
 
         pendulum.step();
       }

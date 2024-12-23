@@ -3,13 +3,13 @@ const CANVAS_HEIGHT = 750;
 
 const ORIGIN = [250, 250];
 
-const ARR_X = 20;
-const ARR_Y = 10;
+const ARR_X = 25;
+const ARR_Y = 12;
 
-const INIT_SCATTER_MULT = 0.005;
+const INIT_SCATTER_MULT = 0.0005;
 
-const INIT_THETA_MIN = 0.05;
-const INIT_THETA_MAX = 0.25;
+const INIT_THETA_MIN = 1.0;
+const INIT_THETA_MAX = 1.1;
 
 const CIRCLE_DIAMETER = 15;
 const CIRCLE_RADIUS = CIRCLE_DIAMETER / 2;
@@ -19,7 +19,7 @@ const LINE2_LENGTH = 120;
 const MASS1 = 1;
 const MASS2 = 1;
 
-const ACCEL_CONST = 0.81;
+const ACCEL_CONST = 8;
 
 const GRID_MIDPOINT_X = ORIGIN[0];
 const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER;
@@ -37,17 +37,28 @@ function Pendulum(theta1, theta2){
     const delta = this.theta2 - this.theta1;
 
     // angular velocity change
-    const denominator = LINE1_LENGTH * (2 * MASS1 + MASS2 - MASS2 * cos(2 * this.theta1 - 2 * this.theta2));
+    const denominator_common = 2 * MASS1 + MASS2 - MASS2 * cos(2 * this.theta1 - 2 * this.theta2);
+    const denominator1 = LINE1_LENGTH * denominator_common;
+    const denominator2 = LINE2_LENGTH * denominator_common;
 
-    const d_omega1 = (-ACCEL_CONST * (2 * MASS1 + MASS2) * sin(this.theta1) - MASS2 * ACCEL_CONST * sin(this.theta1 - 2 * this.theta2) - 2 * sin(this.theta1 - this.theta2) * MASS2 * (this.omega2 ** 2 * LINE2_LENGTH + this.omega1 ** 2 * LINE1_LENGTH * cos(this.theta1 - this.theta2))) / denominator;
+    const d_omega1 = (-ACCEL_CONST * (2 * MASS1 + MASS2) * sin(this.theta1) - MASS2 * ACCEL_CONST * sin(this.theta1 - 2 * this.theta2) - 2 * sin(this.theta1 - this.theta2) * MASS2 * (this.omega2 ** 2 * LINE2_LENGTH + this.omega1 ** 2 * LINE1_LENGTH * cos(this.theta1 - this.theta2))) / denominator1;
 
-    const d_omega2 = (2 * sin(this.theta1 - this.theta2) * (this.omega1 ** 2 * LINE1_LENGTH * (MASS1 + MASS2) + ACCEL_CONST * (MASS1 + MASS2) * cos(this.theta1) + this.omega2 ** 2 * LINE2_LENGTH * MASS2 * cos(this.theta1 - this.theta2))) / denominator;
+    const d_omega2 = (2 * sin(this.theta1 - this.theta2) * (this.omega1 ** 2 * LINE1_LENGTH * (MASS1 + MASS2) + ACCEL_CONST * (MASS1 + MASS2) * cos(this.theta1) + this.omega2 ** 2 * LINE2_LENGTH * MASS2 * cos(this.theta1 - this.theta2))) / denominator2;
 
     this.omega1 += d_omega1;
     this.omega2 += d_omega2;
+    if (isNaN(this.omega1) ||
+      isNaN(this.omega2) ||
+      abs(this.omega1) > PI ||
+      abs(this.omega2) > PI)
+    {
+      console.log(this);
+    }
 
     this.theta1 += this.omega1;
     this.theta2 += this.omega2;
+    this.theta1 %= TAU;
+    this.theta2 %= TAU;
   };
 
   this.draw = function(initX, initY) {
@@ -65,6 +76,10 @@ function Pendulum(theta1, theta2){
   };
 
   this.getColor = function() {
+    if (isNaN(this.theta1) || isNaN(this.theta2))
+    {
+      return [140, 70, 40];
+    }
     return [0, sin(this.theta1) ** 2 * 255, sin(this.theta2) ** 2 * 255];
   }
 };

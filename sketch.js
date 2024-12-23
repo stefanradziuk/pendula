@@ -114,8 +114,8 @@ function Pendulum(theta1, theta2) {
 
     const theta1Ratio = sin(this.theta1) ** 2;
     const theta2Ratio = sin(this.theta2) ** 2;
-    const theta1Idx = floor(theta1Ratio * colorGrid.length);
-    const theta2Idx = floor(theta2Ratio * colorGrid[0].length);
+    const theta1Idx = floor(theta1Ratio * (colorGrid.length - 1));
+    const theta2Idx = floor(theta2Ratio * (colorGrid[0].length - 1));
 
     console.assert(theta1Idx >= 0 && theta1Idx < colorGrid.length, this.theta1, theta1Idx);
     console.assert(theta2Idx >= 0 && theta2Idx < colorGrid[0].length, this.theta2, theta2Idx);

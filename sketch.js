@@ -1,7 +1,10 @@
+p5.disableFriendlyErrors = true;
+
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 750;
 
-const ORIGIN = [250, 250];
+const ORIGIN_X = 250;
+const ORIGIN_Y = 250;
 
 const ARR_X = 25;
 const ARR_Y = 12;
@@ -23,10 +26,10 @@ const ACCEL_CONST = 0.2;
 
 const SUBSTEP_COUNT = 10;
 
-const GRID_MIDPOINT_X = ORIGIN[0];
+const GRID_MIDPOINT_X = ORIGIN_X;
 const GRID_CELL_WIDTH = CIRCLE_RADIUS;
 const GRID_CELL_HEIGHT = CIRCLE_RADIUS;
-const GRID_TOP_Y = ORIGIN[1] + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER + GRID_CELL_HEIGHT;
+const GRID_TOP_Y = ORIGIN_Y + LINE1_LENGTH + LINE2_LENGTH + CIRCLE_DIAMETER + GRID_CELL_HEIGHT;
 const GRID_BOT_Y = GRID_TOP_Y + ARR_Y * GRID_CELL_HEIGHT;
 
 const RGB_MAX = 255;
@@ -36,6 +39,8 @@ const DEFAULT_RGB_0 = [251, 239, 244];
 const DEFAULT_RGB_T1 = [55, 61, 149];
 const DEFAULT_RGB_T2 = [293, 67, 107];
 const DEFAULT_RGB_BACKGROUND = [0, 0, 29];
+
+const DEFAULT_DRAW_TRAILS = true;
 
 let color0;
 let colorT1;
@@ -49,6 +54,8 @@ let picker0;
 let pickerT1;
 let pickerT2;
 let pickerBackground;
+
+let checkboxDrawTrails;
 
 function Pendulum(theta1, theta2) {
   this.theta1 = theta1;
@@ -92,11 +99,11 @@ function Pendulum(theta1, theta2) {
     this.theta2 %= TAU;
   };
 
-  this.draw = function(initX, initY) {
-    const x1 = initX + LINE1_LENGTH * sin(this.theta1);
-    const y1 = initY + LINE1_LENGTH * cos(this.theta1);
+  this.draw = function() {
+    const x1 = ORIGIN_X + LINE1_LENGTH * sin(this.theta1);
+    const y1 = ORIGIN_Y + LINE1_LENGTH * cos(this.theta1);
 
-    line(initX, initY, x1, y1);
+    line(ORIGIN_X, ORIGIN_Y, x1, y1);
     ellipse(x1, y1, CIRCLE_DIAMETER, CIRCLE_DIAMETER);
 
     const x2 = x1 + LINE2_LENGTH * sin(this.theta2);
@@ -165,11 +172,12 @@ function initColorGrid() {
   }
 }
 
-function positionColorPickers() {
+function positionDomElements() {
   picker0.position(0, windowHeight - picker0.height);
   pickerT1.position(picker0.position().x + picker0.width, picker0.position().y);
   pickerT2.position(pickerT1.position().x + pickerT1.width, pickerT1.position().y);
   pickerBackground.position(pickerT2.position().x + pickerT2.width, pickerT2.position().y);
+  checkboxDrawTrails.position(pickerBackground.position().x + pickerBackground.width, pickerBackground.position().y);
 }
 
 function initColorPickers() {
@@ -177,8 +185,6 @@ function initColorPickers() {
   pickerT1 = createColorPicker(color(...DEFAULT_RGB_T1));
   pickerT2 = createColorPicker(color(...DEFAULT_RGB_T2));
   pickerBackground = createColorPicker(color(...DEFAULT_RGB_BACKGROUND));
-
-  positionColorPickers();
 }
 
 function colorsEqual(c1, c2) {
@@ -218,10 +224,17 @@ function setBackgroundColor() {
   select("body").style("background-color", colorBackground);
 }
 
+function initCheckbox() {
+  checkboxDrawTrails = createCheckbox("draw trails", DEFAULT_DRAW_TRAILS);
+  checkboxDrawTrails.style("padding:2px");
+}
+
 function setup() {
   createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
+  initCheckbox();
   initColorPickers();
+  positionDomElements();
   updateColors();
 
   initPendula();
@@ -231,10 +244,25 @@ function setup() {
 }
 
 function windowResized() {
-  positionColorPickers();
+  positionDomElements();
+}
+
+function showTimeElapsed(start) {
+  fill(color(255, 255, 255));
+  stroke(colorBackground);
+  strokeWeight(5);
+  text(`${(millis() - start).toFixed(3)} ms`, 0, 100);
+  strokeWeight(1);
 }
 
 function draw() {
+  // const start = millis();
+
+  if (!checkboxDrawTrails.checked())
+  {
+    clear();
+  }
+
   updateColors();
 
   pendula.forEach(
@@ -250,12 +278,14 @@ function draw() {
           GRID_CELL_WIDTH,
           GRID_CELL_HEIGHT
         );
-        pendulum.draw(...ORIGIN);
+        pendulum.draw(ORIGIN_X, ORIGIN_Y);
 
         pendulum.step();
       }
     )
   );
+
+  // showTimeElapsed(start);
 }
 
 /* alt. idea: draw two pendulums and lerp n pendulums between them */
